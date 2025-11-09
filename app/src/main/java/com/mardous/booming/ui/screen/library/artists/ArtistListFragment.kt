@@ -46,7 +46,6 @@ class ArtistListFragment : AbsRecyclerViewCustomGridSizeFragment<ArtistAdapter, 
     IArtistCallback {
 
     override val titleRes: Int = R.string.artists_label
-    override val isShuffleVisible: Boolean = true
     override val emptyMessageRes: Int
         get() = R.string.no_artists_label
 

@@ -46,7 +46,6 @@ class AlbumListFragment : AbsRecyclerViewCustomGridSizeFragment<AlbumAdapter, Gr
     IAlbumCallback {
 
     override val titleRes: Int = R.string.albums_label
-    override val isShuffleVisible: Boolean = true
     override val emptyMessageRes: Int
         get() = R.string.no_albums_label
 

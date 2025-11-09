@@ -36,6 +36,7 @@ coilTransformations = "3.0.0"
 balloon = "1.6.13"
 composeMarkdown = "0.5.7"
 aboutlibraries = "13.0.0-rc01"
+speeddial = "3.3.0"
 fadingedgelayout = "1.0.0"
 advrecyclerview = "1.0.0"
 fastscroll = "1.3.0"
@@ -118,6 +119,7 @@ balloon = { module = "com.github.skydoves:balloon", version.ref = "balloon" }
 compose-markdown = { module = "com.github.jeziellago:compose-markdown", version.ref = "composeMarkdown" }
 aboutlibraries = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
 
+speeddial = { module = "com.leinardi.android:speed-dial", version.ref = "speeddial" }
 fadingedgelayout = { module = "com.github.bosphere.android-fadingedgelayout:fadingedgelayout", version.ref = "fadingedgelayout" }
 advrecyclerview = { module = "com.h6ah4i.android.widget.advrecyclerview:advrecyclerview", version.ref = "advrecyclerview" }
 fastscroll = { module = "me.zhanghai.android.fastscroll:library", version.ref = "fastscroll" }

@@ -24,8 +24,10 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.core.content.edit
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.leinardi.android.speeddial.SpeedDialView
 import com.mardous.booming.R
 import com.mardous.booming.core.model.GridViewType
 import com.mardous.booming.core.model.action.isPresent
@@ -51,7 +53,6 @@ class FoldersListFragment : AbsRecyclerViewCustomGridSizeFragment<FileAdapter, G
     IFileCallback, IBackConsumer {
 
     override val titleRes: Int = R.string.folders_label
-    override val isShuffleVisible: Boolean = false
 
     override val defaultGridSize: Int
         get() = if (isLandscape) resources.getInteger(R.integer.default_list_columns_land)
@@ -81,6 +82,10 @@ class FoldersListFragment : AbsRecyclerViewCustomGridSizeFragment<FileAdapter, G
         libraryViewModel.getFileSystem().observe(viewLifecycleOwner) { fileSystem ->
             showFolders(fileSystem)
         }
+    }
+
+    override fun onSetUpSpeedDial(view: SpeedDialView) {
+        view.isVisible = false
     }
 
     override fun handleBackPress(): Boolean {

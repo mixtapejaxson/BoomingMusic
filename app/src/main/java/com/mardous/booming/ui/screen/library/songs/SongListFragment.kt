@@ -23,17 +23,24 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.core.content.edit
+import androidx.core.view.doOnLayout
+import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.mardous.booming.R
 import com.mardous.booming.core.model.GridViewType
 import com.mardous.booming.core.sort.SongSortMode
 import com.mardous.booming.data.model.Song
+import com.mardous.booming.extensions.createBoomingMusicBalloon
+import com.mardous.booming.extensions.dp
 import com.mardous.booming.ui.ISongCallback
 import com.mardous.booming.ui.adapters.song.SongAdapter
 import com.mardous.booming.ui.component.base.AbsRecyclerViewCustomGridSizeFragment
 import com.mardous.booming.ui.component.menu.onSongMenu
 import com.mardous.booming.ui.component.menu.onSongsMenu
 import com.mardous.booming.ui.screen.library.ReloadType
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * @author Christians M. A. (mardous)
@@ -41,7 +48,6 @@ import com.mardous.booming.ui.screen.library.ReloadType
 class SongListFragment : AbsRecyclerViewCustomGridSizeFragment<SongAdapter, GridLayoutManager>(), ISongCallback {
 
     override val titleRes: Int = R.string.songs_label
-    override val isShuffleVisible: Boolean = true
     override val emptyMessageRes: Int
         get() = R.string.no_songs_label
 
@@ -60,6 +66,24 @@ class SongListFragment : AbsRecyclerViewCustomGridSizeFragment<SongAdapter, Grid
         super.onShuffleClicked()
         adapter?.dataSet?.let { songs ->
             playerViewModel.openAndShuffleQueue(songs)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        speedDial?.doOnLayout {
+            viewLifecycleOwner.lifecycleScope.launch {
+                delay(1000)
+                val balloon = createBoomingMusicBalloon("shuffle_button_tip") {
+                    setDismissWhenClicked(true)
+                    setText(getString(R.string.shuffle_button_tip))
+                }
+                speedDial?.let {
+                    if (it.isVisible && balloon?.isShowing == false) {
+                        balloon.showAlignTop(it, yOff = (-8).dp(resources))
+                    }
+                }
+            }
         }
     }
 

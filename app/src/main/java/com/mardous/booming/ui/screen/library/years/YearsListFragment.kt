@@ -24,8 +24,10 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.core.content.edit
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.leinardi.android.speeddial.SpeedDialView
 import com.mardous.booming.R
 import com.mardous.booming.core.model.GridViewType
 import com.mardous.booming.core.sort.YearSortMode
@@ -40,13 +42,16 @@ class YearsListFragment : AbsRecyclerViewCustomGridSizeFragment<YearAdapter, Gri
     IYearCallback {
 
     override val titleRes: Int = R.string.release_years_label
-    override val isShuffleVisible: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         libraryViewModel.getYears().observe(viewLifecycleOwner) { releaseYears ->
             adapter?.dataSet = releaseYears
         }
+    }
+
+    override fun onSetUpSpeedDial(view: SpeedDialView) {
+        view.isVisible = false
     }
 
     override fun onResume() {

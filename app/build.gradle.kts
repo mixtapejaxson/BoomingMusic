@@ -217,6 +217,7 @@ dependencies {
     implementation(libs.compose.markdown)
     implementation(libs.aboutlibraries)
 
+    implementation(libs.speeddial)
     implementation(libs.fadingedgelayout)
     implementation(libs.advrecyclerview) {
         isTransitive = true

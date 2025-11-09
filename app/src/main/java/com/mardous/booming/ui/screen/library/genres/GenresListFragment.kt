@@ -24,8 +24,10 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.core.content.edit
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.leinardi.android.speeddial.SpeedDialView
 import com.mardous.booming.R
 import com.mardous.booming.core.model.GridViewType
 import com.mardous.booming.core.sort.GenreSortMode
@@ -40,7 +42,6 @@ class GenresListFragment : AbsRecyclerViewCustomGridSizeFragment<GenreAdapter, G
     IGenreCallback {
 
     override val titleRes: Int = R.string.genres_label
-    override val isShuffleVisible: Boolean = false
     override val emptyMessageRes: Int = R.string.no_genres_label
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -48,6 +49,10 @@ class GenresListFragment : AbsRecyclerViewCustomGridSizeFragment<GenreAdapter, G
         libraryViewModel.getGenres().observe(viewLifecycleOwner) { genres ->
             adapter?.dataSet = genres
         }
+    }
+
+    override fun onSetUpSpeedDial(view: SpeedDialView) {
+        view.isVisible = false
     }
 
     override fun onResume() {

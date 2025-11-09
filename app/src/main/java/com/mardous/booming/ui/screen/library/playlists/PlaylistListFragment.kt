@@ -23,9 +23,12 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.leinardi.android.speeddial.SpeedDialActionItem
+import com.leinardi.android.speeddial.SpeedDialView
 import com.mardous.booming.R
 import com.mardous.booming.core.model.GridViewType
 import com.mardous.booming.core.sort.PlaylistSortMode
@@ -47,7 +50,6 @@ class PlaylistListFragment : AbsRecyclerViewCustomGridSizeFragment<PlaylistAdapt
     IPlaylistCallback {
 
     override val titleRes: Int = R.string.playlists_label
-    override val isShuffleVisible: Boolean = false
     override val emptyMessageRes: Int
         get() = R.string.no_device_playlists
 
@@ -63,6 +65,37 @@ class PlaylistListFragment : AbsRecyclerViewCustomGridSizeFragment<PlaylistAdapt
         super.onViewCreated(view, savedInstanceState)
         libraryViewModel.getPlaylists().observe(viewLifecycleOwner) { playlists ->
             adapter?.dataSet = playlists
+        }
+    }
+
+    override fun onSetUpSpeedDial(view: SpeedDialView) {
+        view.contentDescription = getString(R.string.new_playlist_title)
+        view.addActionItem(
+            SpeedDialActionItem.Builder(R.id.action_import_playlist, R.drawable.ic_file_open_24dp)
+                .setLabel(R.string.action_import_playlist)
+                .create()
+        )
+        view.addActionItem(
+            SpeedDialActionItem.Builder(R.id.action_new_playlist, R.drawable.ic_playlist_add_24dp)
+                .setLabel(R.string.new_playlist_title)
+                .create()
+        )
+        view.setMainFabOpenedDrawable(ContextCompat.getDrawable(view.context, R.drawable.ic_close_24dp))
+        view.setMainFabClosedDrawable(ContextCompat.getDrawable(view.context, R.drawable.ic_add_24dp))
+        view.setOnActionSelectedListener { selectedItem ->
+            when (selectedItem.id) {
+                R.id.action_new_playlist -> {
+                    CreatePlaylistDialog().show(childFragmentManager, "NEW_PLAYLIST")
+                    speedDial?.close()
+                    true
+                }
+                R.id.action_import_playlist -> {
+                    ImportPlaylistDialog().show(childFragmentManager, "IMPORT_PLAYLIST")
+                    speedDial?.close()
+                    true
+                }
+                else -> false
+            }
         }
     }
 
@@ -109,8 +142,6 @@ class PlaylistListFragment : AbsRecyclerViewCustomGridSizeFragment<PlaylistAdapt
     override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateMenu(menu, inflater)
         menu.removeItem(R.id.action_view_type)
-        menu.add(0, R.id.action_new_playlist, 0, R.string.new_playlist_title)
-        menu.add(0, R.id.action_import_playlist, 0, R.string.action_import_playlist)
         PlaylistSortMode.AllPlaylists.createMenu(menu)
     }
 
@@ -119,18 +150,7 @@ class PlaylistListFragment : AbsRecyclerViewCustomGridSizeFragment<PlaylistAdapt
             libraryViewModel.forceReload(ReloadType.Playlists)
             return true
         }
-        return when (item.itemId) {
-            R.id.action_new_playlist -> {
-                CreatePlaylistDialog()
-                    .show(childFragmentManager, "NEW_PLAYLIST")
-                true
-            }
-            R.id.action_import_playlist -> {
-                ImportPlaylistDialog().show(childFragmentManager, "IMPORT_PLAYLIST")
-                true
-            }
-            else -> super.onMenuItemSelected(item)
-        }
+        return super.onMenuItemSelected(item)
     }
 
     override fun getSavedViewType(): GridViewType {

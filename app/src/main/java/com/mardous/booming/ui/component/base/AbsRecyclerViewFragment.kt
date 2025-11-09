@@ -22,31 +22,30 @@ import android.os.Bundle
 import android.view.*
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.leinardi.android.speeddial.SpeedDialView
 import com.mardous.booming.R
 import com.mardous.booming.core.model.MediaEvent
 import com.mardous.booming.databinding.FragmentMainRecyclerBinding
-import com.mardous.booming.extensions.*
+import com.mardous.booming.extensions.launchAndRepeatWithViewLifecycle
 import com.mardous.booming.extensions.resources.createFastScroller
-import com.mardous.booming.extensions.resources.onVerticalScroll
+import com.mardous.booming.extensions.setSupportActionBar
+import com.mardous.booming.extensions.topLevelTransition
+import com.mardous.booming.extensions.whichFragment
 import com.mardous.booming.ui.IScrollHelper
 import com.mardous.booming.ui.dialogs.playlists.ImportPlaylistDialog
 import com.mardous.booming.ui.screen.other.ShuffleModeFragment
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScroller
 import org.koin.android.ext.android.inject
 
 abstract class AbsRecyclerViewFragment<A : RecyclerView.Adapter<*>, LM : RecyclerView.LayoutManager> :
-    AbsMainActivityFragment(R.layout.fragment_main_recycler), IScrollHelper {
+    AbsMainActivityFragment(R.layout.fragment_main_recycler),
+    IScrollHelper {
 
     private var _binding: FragmentMainRecyclerBinding? = null
     private val binding get() = _binding!!
@@ -55,9 +54,8 @@ abstract class AbsRecyclerViewFragment<A : RecyclerView.Adapter<*>, LM : Recycle
     protected var layoutManager: LM? = null
 
     val toolbar: Toolbar get() = binding.appBarLayout.toolbar
-    val shuffleButton: FloatingActionButton get() = binding.shuffleButton
+    val speedDial get() = _binding?.speedDial
 
-    abstract val isShuffleVisible: Boolean
     abstract val titleRes: Int
 
     protected val sharedPreferences: SharedPreferences by inject()
@@ -77,30 +75,13 @@ abstract class AbsRecyclerViewFragment<A : RecyclerView.Adapter<*>, LM : Recycle
         setUpRecyclerView()
         setupToolbar()
 
-        // Add listeners when shuffle is visible
-        if (isShuffleVisible) {
-            binding.recyclerView.onVerticalScroll(
-                viewLifecycleOwner,
-                onScrollDown = { binding.shuffleButton.hide() },
-                onScrollUp = { binding.shuffleButton.show() }
-            )
-            binding.shuffleButton.apply {
-                setOnClickListener {
-                    onShuffleClicked()
-                }
-                setOnLongClickListener {
-                    onShuffleLongClick()
-                }
-            }
-        } else {
-            binding.shuffleButton.isVisible = false
-        }
+        onSetUpSpeedDial(binding.speedDial)
 
         libraryViewModel.getMiniPlayerMargin().observe(viewLifecycleOwner) {
             binding.recyclerView.updatePadding(bottom = it.totalMargin)
         }
         libraryViewModel.getFabMargin().observe(viewLifecycleOwner) {
-            binding.shuffleButton.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.speedDial.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = it.totalMargin
             }
         }
@@ -114,21 +95,18 @@ abstract class AbsRecyclerViewFragment<A : RecyclerView.Adapter<*>, LM : Recycle
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        _binding?.shuffleButton?.doOnLayout {
-            viewLifecycleOwner.lifecycleScope.launch {
-                delay(1000)
-                val balloon = createBoomingMusicBalloon("shuffle_button_tip") {
-                    setDismissWhenClicked(true)
-                    setText(getString(R.string.shuffle_button_tip))
-                }
-                _binding?.shuffleButton?.let {
-                    if (it.isVisible && balloon?.isShowing == false) {
-                        balloon.showAlignTop(it, yOff = (-8).dp(resources))
-                    }
-                }
+    open fun onSetUpSpeedDial(view: SpeedDialView) {
+        view.contentDescription = getString(R.string.shuffle_all_label)
+        view.setOnChangeListener(object : SpeedDialView.OnChangeListener {
+            override fun onMainActionSelected(): Boolean {
+                onShuffleClicked()
+                return false
             }
+
+            override fun onToggleChanged(isOpen: Boolean) {}
+        })
+        view.mainFab.setOnLongClickListener {
+            onShuffleLongClick()
         }
     }
 
