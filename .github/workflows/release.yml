@@ -11,10 +11,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        variant: [ normal, fdroid ]
-
     steps:
       - uses: actions/checkout@v4
 
@@ -40,14 +36,12 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build app
-        env:
-          BUILD_VARIANT: ${{ matrix.variant == 'normal' && 'Normal' || 'Fdroid' }}
-        run: ./gradlew assemble${{ env.BUILD_VARIANT }}Release
+        run: ./gradlew assembleNormalRelease --no-daemon --stacktrace
 
       - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
-          name: apk-${{ matrix.variant }}-release
+          name: apk-normal-release
           path: app/build/outputs/apk/*/release/*-release.apk
 
   publish-release:
@@ -78,5 +72,4 @@ jobs:
           prerelease: ${{ steps.prerelease.outputs.value }}
           generate_release_notes: true
           files: |
-            release-apks/*/release/*-fdroid-release.apk
             release-apks/*/release/*-normal-release.apk

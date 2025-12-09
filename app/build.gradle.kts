@@ -95,9 +95,6 @@ android {
         create("normal") {
             dimension = "version"
         }
-        create("fdroid") {
-            dimension = "version"
-        }
     }
 
     val signingProperties = getProperties("keystore.properties")
